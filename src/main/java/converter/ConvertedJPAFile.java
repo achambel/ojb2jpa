@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,21 +14,22 @@ import java.util.regex.Pattern;
 public class ConvertedJPAFile {
 	
 	private String pathToSave;
+	private List<String> imports = new ArrayList<>();
 	private String packageName;
 	private String className;
 	private String OJBFileContent;
-	private List<Field> OJBFields = new ArrayList<>();
-	private List<Method> OJBMethods = new ArrayList<>();
+	private List<FieldDefinition> OJBFields = new ArrayList<>();
+	private HashMap<Method, Object> OJBMethods = new HashMap<>();
 	private Path sourceFilePath;
 	
-	public ConvertedJPAFile(Path sourceFilePath, String pathToSave) throws ClassNotFoundException {
+	public ConvertedJPAFile(Path sourceFilePath, String pathToSave) throws Exception {
 		
 		this.sourceFilePath = sourceFilePath;
 		this.pathToSave = pathToSave;
 		readOJBFileContent();
 	}
 	
-	private void readOJBFileContent() throws ClassNotFoundException {
+	private void readOJBFileContent() throws Exception {
 		
 		try {
 			String fileContent = new String(Files.readAllBytes(sourceFilePath));
@@ -39,22 +41,60 @@ public class ConvertedJPAFile {
 		}
 	}
 	
-	private void setClassInformation() throws ClassNotFoundException {
+	private void setClassInformation() throws Exception {
 		
 		setPackageName();
+		setImports();
 		setClassName();
 		
 		Class<?> clazz =  Class.forName(getPackageName() + "." + getClassName());
-		
+
 		Field[] fields = clazz.getDeclaredFields();
 		for (Field field : fields) {
-			this.OJBFields.add(field);
+			
+			FieldDefinition fieldDefinition = new FieldDefinition(field, this.OJBFileContent);
+			this.OJBFields.add(fieldDefinition);
 		}
 		
 		Method[] methods = clazz.getDeclaredMethods();
 		for (Method method : methods) {
-			this.OJBMethods.add(method);
+			String bodyMethod = findBodyMethod(method.getName());
+			this.OJBMethods.put(method, bodyMethod);
 		}
+		
+	}
+	
+
+	private void setImports() {
+
+		final String regex = "import\\s+[\\w.]+;";
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(this.OJBFileContent);
+		
+		while (matcher.find()) {
+			imports.add(matcher.group(0));
+		}
+		
+	}
+
+	private String findBodyMethod(String methodName) throws Exception {
+		
+		String bodyMethod = null;
+		
+		final String regex = "\\b"+methodName+"\\b\\s*\\(.*(\\{(\\n?(?!public|protected|default|private).|\\n)*?\\}\\s{2,})";
+		final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
+		
+		final Matcher matcher = pattern.matcher(this.OJBFileContent);
+		
+		if (matcher.find()) {
+			bodyMethod = matcher.group(1);
+		}
+		
+		if (bodyMethod == null) {
+			throw new Exception("The content of method "+methodName +" was not found. Check the source file or method name");
+		}
+		
+		return bodyMethod.trim();
 		
 	}
 
@@ -82,6 +122,10 @@ public class ConvertedJPAFile {
 		return packageName;
 	}
 	
+	public List<String> getImports() {
+		return imports;
+	}
+	
 	public Path getSourceFilePath() {
 		return sourceFilePath;
 	}
@@ -104,23 +148,13 @@ public class ConvertedJPAFile {
 	}
 
 
-	public List<Field> getOJBFields() {
+	public List<FieldDefinition> getOJBFields() {
 		return OJBFields;
 	}
 
 
-	public void setOJBFields(List<Field> oJBFields) {
-		OJBFields = oJBFields;
-	}
-
-
-	public List<Method> getOJBMethods() {
+	public HashMap<Method, Object> getOJBMethods() {
 		return OJBMethods;
-	}
-
-
-	public void setOJBMethods(List<Method> oJBMethods) {
-		OJBMethods = oJBMethods;
 	}
 	
 }

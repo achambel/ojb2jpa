@@ -1,12 +1,38 @@
 package converter.resources.classes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import javax.annotation.Resource;
 
 public class HelloWorld {
 	
-	private String firstField;
+	private String firstField = "A text as default value";
 	private int secondField;
+	String thirdField;
+	
+	private List<String> list = new ArrayList<>();
+	
+	private static final long serialVersionUID = 1;
+	
+	public static final String STATUS_IN_USE = "I";
+	public static final String STATUS_LOST = "L";
+	public static final String STATUS_BLOCKED = "B";
+	private static final String STATUS_UNASSIGNED = "U";
+	
+	@Resource(name = "foo", description = "bar")
+	public static final String DEFAULT_STATUS = STATUS_UNASSIGNED;
+		
+	@Deprecated
+	@Resource(name = "foo", description = "bar")
+	public static HashMap<String, String> STATUSES = new HashMap<String, String>() {{
+		
+		put(STATUS_IN_USE, "In use");
+		put(STATUS_LOST, "Lost");
+		put(STATUS_BLOCKED, "Blocked");
+		put(STATUS_UNASSIGNED, "Unassigned");
+	}};
 	
 	public String getFirstField() {
 		return firstField;
@@ -28,5 +54,15 @@ public class HelloWorld {
 		
 		return new ArrayList<>();
 	}
+
+	public List<String> getList() {
+		return list;
+	}
+
+	public void setList(List<String> list) {
+		this.list = list;
+	}
+	
+	
 
 }

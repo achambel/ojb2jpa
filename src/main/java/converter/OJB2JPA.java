@@ -19,7 +19,6 @@ public class OJB2JPA {
 	
 	public OJB2JPA(String sourceFolderPath) throws OJB2JPAPathNotFoundException {
 		
-		//TODO just need the source files, don't need to add byteCode
 		try {
 			sourceFiles = Files.newDirectoryStream(Paths.get(sourceFolderPath), path -> path.toString().endsWith(".java"));
 			
@@ -36,7 +35,7 @@ public class OJB2JPA {
 				.collect(Collectors.toList());
 	}
 	
-	public void convert(String pathToSave) throws IOException, ClassNotFoundException {
+	public void convert(String pathToSave) throws Exception {
 		
 		convertedJPAFiles = new ArrayList<>();
 		

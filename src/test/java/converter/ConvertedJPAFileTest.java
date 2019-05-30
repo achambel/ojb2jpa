@@ -2,9 +2,10 @@ package converter;
 
 import static org.junit.Assert.assertEquals;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -19,30 +20,40 @@ public class ConvertedJPAFileTest {
 		
 		ConvertedJPAFile jpaFile = new ConvertedJPAFile(Paths.get(sourceFilePath), pathToSave);
 		
-		assertEquals(4, jpaFile.getImports().size());
+		assertEquals(6, jpaFile.getImports().size());
 		
 		assertEquals("converter.resources.classes", jpaFile.getPackageName());
 		
+		assertEquals("John Doe", jpaFile.getAuthor());
+		
+		assertEquals("1.0", jpaFile.getVersion());
+		
+		assertEquals("tb_hello_world", jpaFile.getTableName());
+		
 		assertEquals("HelloWorld", jpaFile.getClassName());
+		
+		List<String> fieldAnnotations = jpaFile.getOJBFields()
+			   .stream()
+			   .map(FieldDefinition::getAnnotations)
+			   .flatMap(Collection::stream)
+			   .collect(Collectors.toList());
+		
+		assertEquals(3, fieldAnnotations.size());
+			   
 		
 		assertEquals(11, jpaFile.getOJBFields().size());
 		
+		List<String> methodAnnotations = jpaFile.getOJBMethods()
+				   .stream()
+				   .map(MethodDefinition::getAnnotations)
+				   .flatMap(Collection::stream)
+				   .collect(Collectors.toList());
+			
+		assertEquals(1, methodAnnotations.size());
+		
 		assertEquals(7, jpaFile.getOJBMethods().size());
 		
-		
-		for (FieldDefinition fieldDefinition : jpaFile.getOJBFields()) {
-			
-			Field field = fieldDefinition.getField();
-			
-			System.out.println("Getting field definition for " + field.getName());
-			System.out.println(fieldDefinition.getRawCode());
-			
-			for (Annotation annotation : field.getDeclaredAnnotations()) {
-				
-				System.out.println("Annotation name: " + annotation.annotationType().getSimpleName());
-				
-			}
-		}
+		System.out.println(jpaFile.printConvertedClass());
 		
 		
 	}

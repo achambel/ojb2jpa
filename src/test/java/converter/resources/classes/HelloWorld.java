@@ -6,8 +6,19 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+/**
+ * @author John Doe
+ * @version 1.0
+ * @ojb.class
+ *      table="tb_hello_world"
+ */
 public class HelloWorld {
 	
+	/**
+     * @ojb.field column="first_field"
+     *            length="50"
+     *            jdbc-type="VARCHAR"
+     */
 	private String firstField = "A text as default value";
 	private int secondField;
 	String thirdField;
@@ -38,6 +49,7 @@ public class HelloWorld {
 		return firstField;
 	}
 	
+	@Deprecated
 	public void setFirstField(String firstField) {
 		this.firstField = firstField;
 	}

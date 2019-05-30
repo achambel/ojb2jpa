@@ -1,45 +1,47 @@
 package converter;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FieldDefinition {
-	
-	private Field field;
-	private String rawCode;
-	private List<String> annotations = new ArrayList<>();
-	private String sourceCode;
-	
+public class FieldDefinition extends BaseDefinition {
+		
+	private String doclet;
+	private String type;
+
 	public FieldDefinition(Field field, String sourceCode) throws Exception {
-		this.field = field;
+		
+		this.member = field;
+		this.type = field.getType().getSimpleName();
 		this.sourceCode = sourceCode;
 		this.rawCode = findRawCode();
 		this.annotations = findAnnotations();
+		this.doclet = findDoclet();
 	}
 	
-	public Field getField() {
-		return field;
+	public String getDoclet() {
+		return doclet;
 	}
 	
-	public String getRawCode() {
-		return rawCode;
-	}
+	private String findDoclet() {
+		
+		String doc = null;
+		
+		final String regex = String.format("(?:\\/\\*(?:[^\\*]|(?:\\*+[^\\*\\/]))*\\*+\\/(?=\\s.*))(?=\\s*(?:@\\w.+\\s*)*.+%s\\s+%s)", Pattern.quote(type), member.getName());
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(sourceCode);
 
-	public List<String> getAnnotations() {
-		return annotations;
-	}
+		if (matcher.find()) {
+			doc = matcher.group(0);
+		}
 
-	public boolean hasAnnotations() {
-		return annotations.size() > 0;
+		return doc;
+		
 	}
 	
 	private String findRawCode() throws Exception {
 		
-		String fieldName = field.getName();
+		String fieldName = member.getName();
 		String rawCode = null;
 		
 		final String regex = String.format("(.+\\b%s\\b.+\\{(\\n?.|\\n)*?\\};\\s{2,})|(.+\\b%s\\b.*;$)", fieldName, fieldName);
@@ -54,47 +56,7 @@ public class FieldDefinition {
 			throw new Exception("Field "+fieldName +" was not found. Check the source file or field name");
 		}
 		
-		return rawCode;
+		return rawCode.trim();
 	}
-	
-	private List<String> findAnnotations() throws Exception {
-		
-		final String regex = String.format("(@.+(?>@.+|[\\s])*?).+(?=%s)", Pattern.quote(rawCode.trim()));
-		final Pattern pattern = Pattern.compile(regex);
-		final Matcher matcher = pattern.matcher(sourceCode);
-		
-		List<String> annotations = new ArrayList<>();
-		
-		if (matcher.find()) {
-			String allAnnotations = matcher.group(1);
-			
-			final String annotationRegex = "@.+";
-			final Pattern annotationPattern = Pattern.compile(annotationRegex);
-			final Matcher annotationMatcher = annotationPattern.matcher(allAnnotations);
-			
-			while (annotationMatcher.find()) {
-				annotations.add(annotationMatcher.group(0));
-			}
-			
-		}
-		
-		
-		if (annotations.size() != field.getDeclaredAnnotations().length) {
-			throw new Exception("Incorrect number of annotations for the field " + field.getName() + "Check the source code or regex used for capture them.");
-		}
-		
-		for (Annotation a : field.getDeclaredAnnotations()) {
-			
-			String name = "@"+a.annotationType().getSimpleName();
-			boolean isCaptured = annotations.stream().anyMatch(str -> str.startsWith(name));
-			
-			if (!isCaptured) {
-				throw new Exception("Annotation " + name + " was not found. It means that annotation exists in the source code but not in the parsed code.");
-			}
-		}
-		
-		return annotations;
-	}
-	
 
 }

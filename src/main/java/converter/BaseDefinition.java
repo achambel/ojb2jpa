@@ -1,0 +1,78 @@
+package converter;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Member;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public abstract class BaseDefinition {
+
+	protected String rawCode;
+	protected String sourceCode;
+	protected Member member;
+	protected List<String> annotations = new ArrayList<>();
+	
+	protected List<String> findAnnotations() throws Exception {
+		
+		final String regex = String.format("(@.+(?>@.+|[\\s])*?).+(?=%s)", Pattern.quote(rawCode.trim()));
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(sourceCode);
+		
+		List<String> annotations = new ArrayList<>();
+		
+		if (matcher.find()) {
+			String allAnnotations = matcher.group(1);
+			
+			final String annotationRegex = "@.+";
+			final Pattern annotationPattern = Pattern.compile(annotationRegex);
+			final Matcher annotationMatcher = annotationPattern.matcher(allAnnotations);
+			
+			while (annotationMatcher.find()) {
+				annotations.add(annotationMatcher.group(0).trim());
+			}
+			
+		}
+		
+		
+		if (annotations.size() != ((AnnotatedElement) member).getDeclaredAnnotations().length) {
+			throw new Exception("Incorrect number of annotations for the field " + member.getName() + "Check the source code or regex used for capture them.");
+		}
+		
+		for (Annotation a : ((AnnotatedElement) member).getDeclaredAnnotations()) {
+			
+			String name = "@"+a.annotationType().getSimpleName();
+			boolean isCaptured = annotations.stream().anyMatch(str -> str.startsWith(name));
+			
+			if (!isCaptured) {
+				throw new Exception("Annotation " + name + " was not found. It means that annotation exists in the source code but not in the parsed code.");
+			}
+		}
+		
+		return annotations;
+	}
+	
+	public Member getMember() {
+		return member;
+	}
+	
+	public String getRawCode() {
+		return rawCode;
+	}
+
+	public List<String> getAnnotations() {
+		return annotations;
+	}
+
+	public boolean hasAnnotations() {
+		return annotations.size() > 0;
+	}
+	
+	@Override
+	public String toString() {
+		
+		return member.getName();
+	}
+}

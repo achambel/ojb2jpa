@@ -16,6 +16,9 @@ public class FieldDefinition extends BaseDefinition {
 	private Map<String, Class<? extends IOJBDefinition>> ojbClassMapping = new HashMap<String, Class<? extends IOJBDefinition>>() {{
 		
 		put("field", OJBFieldDefinition.class);
+		put("collection", OJBCollectionDefinition.class);
+		put("reference", OJBReferenceDefinition.class);
+		
 	}};
 
 	public FieldDefinition(Field field, String sourceCode) throws Exception {
@@ -64,7 +67,7 @@ public class FieldDefinition extends BaseDefinition {
 		
 		String doc = null;
 		
-		final String regex = String.format("(?:\\/\\*(?:[^\\*]|(?:\\*+[^\\*\\/]))*\\*+\\/(?=\\s.*))(?=\\s*(?:@\\w.+\\s*)*.+%s\\s+%s)", Pattern.quote(type), member.getName());
+		final String regex = String.format("(?:\\/\\*(?:[^\\*]|(?:\\*+[^\\*\\/]))*\\*+\\/(?=\\s.*))(?=\\s*(?:@\\w.+\\s*)*.+%s(?:.*)\\s+%s)", Pattern.quote(type), member.getName());
 		final Pattern pattern = Pattern.compile(regex);
 		final Matcher matcher = pattern.matcher(sourceCode);
 
@@ -94,6 +97,10 @@ public class FieldDefinition extends BaseDefinition {
 		}
 		
 		return rawCode.trim();
+	}
+	
+	public boolean hasOJBDefinition() {
+		return ojbDefinition != null;
 	}
 
 }

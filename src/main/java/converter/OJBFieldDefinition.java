@@ -29,15 +29,14 @@ public class OJBFieldDefinition extends OJBDefinition implements IOJBDefinition 
 		}
 		
 		if (!groups.isEmpty()) {
+			
 			String jpaAnnotation = String.format("@Column(%s)", String.join(", ", groups));
-			this.setJpaAnnotation(jpaAnnotation);
+			
+			this.getImports().add("import javax.persistence.Column;");
+			this.getJpaAnnotations().add(jpaAnnotation);
+			
 		}
 		
-	}
-
-	public String getJPAAnnotationImport() {
-		
-		return "import javax.persistence.Column;";
 	}
 	
 

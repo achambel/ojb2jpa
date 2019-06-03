@@ -20,7 +20,7 @@ public class ConvertedJPAFileTest {
 		
 		ConvertedJPAFile jpaFile = new ConvertedJPAFile(Paths.get(sourceFilePath), pathToSave);
 		
-		assertEquals(6, jpaFile.getImports().size());
+		assertEquals(10, jpaFile.getImports().size());
 		
 		assertEquals("converter.resources.classes", jpaFile.getPackageName());
 		
@@ -41,7 +41,7 @@ public class ConvertedJPAFileTest {
 		assertEquals(3, fieldAnnotations.size());
 			   
 		
-		assertEquals(11, jpaFile.getOJBFields().size());
+		assertEquals(12, jpaFile.getOJBFields().size());
 		
 		List<String> methodAnnotations = jpaFile.getOJBMethods()
 				   .stream()
@@ -51,7 +51,7 @@ public class ConvertedJPAFileTest {
 			
 		assertEquals(1, methodAnnotations.size());
 		
-		assertEquals(7, jpaFile.getOJBMethods().size());
+		assertEquals(9, jpaFile.getOJBMethods().size());
 		
 		System.out.println(jpaFile.printConvertedClass());
 		

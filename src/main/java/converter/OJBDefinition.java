@@ -1,9 +1,13 @@
 package converter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class OJBDefinition {
 	
 	private String doclet;
-	private String jpaAnnotation;
+	private List<String> jpaAnnotations = new ArrayList<>();
+	private List<String> imports = new ArrayList<>();;
 	
 	public String getDoclet() {
 		return doclet;
@@ -11,13 +15,19 @@ public abstract class OJBDefinition {
 	public void setDoclet(String doclet) {
 		this.doclet = doclet;
 	}
-	public String getJpaAnnotation() {
-		return jpaAnnotation;
+	public List<String> getJpaAnnotations() {
+		return jpaAnnotations;
 	}
-	public void setJpaAnnotation(String jpaAnnotation) {
-		this.jpaAnnotation = jpaAnnotation;
+	public void setJpaAnnotations(List<String> jpaAnnotation) {
+		this.jpaAnnotations = jpaAnnotation;
 	}
 	
+	public void setImports(List<String> imports) {
+		this.imports = imports;
+	}
 	
-
+	public List<String> getImports() {
+		return imports;
+	}
+	
 }

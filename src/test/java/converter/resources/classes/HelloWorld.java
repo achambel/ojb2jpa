@@ -45,6 +45,17 @@ public class HelloWorld {
 		put(STATUS_UNASSIGNED, "Unassigned");
 	}};
 	
+	/**
+     * @ojb.collection element-class-ref="com.aliquantum.objects.UserDocumentUser"
+     *                 collection-class="org.apache.ojb.broker.util.collections.RemovalAwareCollection"
+     *            	   foreignkey="userDocumentIdentity"
+     *   		  	   auto-delete="true"
+     *   		  	   auto-insert="true"
+     *   		  	   auto-update="true"
+     * 				   auto-retrieve="true" proxy="true"
+     */
+	private List<String> users;
+	
 	public String getFirstField() {
 		return firstField;
 	}
@@ -73,6 +84,14 @@ public class HelloWorld {
 
 	public void setList(List<String> list) {
 		this.list = list;
+	}
+
+	public List<String> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<String> users) {
+		this.users = users;
 	}
 	
 	

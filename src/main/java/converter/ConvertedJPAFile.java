@@ -52,12 +52,6 @@ public class ConvertedJPAFile {
 		
 		StringBuilder code = new StringBuilder();
 		
-		code.append(getPackageName()+";"+newLine(2));
-		
-		String imports = String.join(newLine(1), getImports());
-		
-		code.append(imports);
-		
 		code.append("\n\n/**\n");
 		code.append(String.format(" * @author %s\n", getAuthor()));
 		code.append(String.format(" * @version %s\n", getVersion()));
@@ -71,7 +65,16 @@ public class ConvertedJPAFile {
 		
 		for (FieldDefinition field : OJBFields) {
 			
-			field.getAnnotations().forEach(a -> {
+			List<String> annotations = new ArrayList<>();
+			
+			if (field.hasAnnotations()) annotations.addAll(field.getAnnotations());
+			
+			if (field.hasOJBDefinition()) { 
+				annotations.addAll(field.getOJBDefinition().getJpaAnnotations());
+				imports.addAll(field.getOJBDefinition().getImports());
+			}
+
+			annotations.forEach(a -> {
 				code.append(String.format("\t%s\n", a));
 			});
 			
@@ -89,6 +92,11 @@ public class ConvertedJPAFile {
 		}
 		
 		code.append("}");
+		
+		String imports = String.join(newLine(1), getImports());
+		
+		code.insert(0, imports);
+		code.insert(0, getPackageName()+";"+newLine(2));
 		
 		return code.toString();
 	}

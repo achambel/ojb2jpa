@@ -20,7 +20,7 @@ public class ConvertedJPAFileTest {
 		
 		ConvertedJPAFile jpaFile = new ConvertedJPAFile(Paths.get(sourceFilePath), pathToSave);
 		
-		assertEquals(12, jpaFile.getImports().size());
+		assertEquals(13, jpaFile.getImports().size());
 		
 		assertEquals("converter.resources.classes", jpaFile.getPackageName());
 		
@@ -57,4 +57,5 @@ public class ConvertedJPAFileTest {
 		
 		
 	}
+	
 }

@@ -101,7 +101,7 @@ public class OJBReferenceDefinitionTest {
 	}
 	
 	@Test
-	public void noDocletTest() {
+	public void noDocletTest() throws Exception {
 		
 		String doclet = "// just a single line comment";
 		

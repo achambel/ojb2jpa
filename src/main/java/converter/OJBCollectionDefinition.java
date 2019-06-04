@@ -13,8 +13,9 @@ public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefini
 	}
 
 	@Override
-	public void parse2JPA(String doclet) {
+	public void parse2JPA(String doclet) throws Exception {
 
+		// TODO ADD ORDER BY ANNOTATION
 		this.setDoclet(doclet);
 		
 		List<String> groups = new ArrayList<>();
@@ -57,7 +58,25 @@ public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefini
 			
 			this.getJpaAnnotations().add(jpaAnnotation);
 			
+			if (hasOrderBy()) {
+				this.getImports().add("import javax.persistence.OrderBy;");
+				String orderBy = extractFirstGroup("orderby\\s*=\\s*\"(.+)\"", doclet);
+				orderBy = orderBy.replaceAll("=", " ");
+				String annotation = String.format("@OrderBy(\"%s\")", orderBy);
+				this.getJpaAnnotations().add(annotation);
+			}
+			
 		}
+		
+	}
+	
+	private boolean hasOrderBy() {
+		
+		final String regex = "orderby\\s*=\\s*\"(.+)\"";
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(getDoclet());
+		
+		return matcher.find();
 		
 	}
 

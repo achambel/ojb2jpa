@@ -66,4 +66,17 @@ public abstract class OJBDefinition {
 		return matcher.find();
 	}
 	
+	protected String extractFirstGroup(String regex, String str) throws Exception {
+		
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(str);
+		
+		if (matcher.find()) {
+			
+			return matcher.group(1);
+		}
+		
+		throw new Exception("First group not found at regex " + regex + " in " + str);
+	}
+	
 }

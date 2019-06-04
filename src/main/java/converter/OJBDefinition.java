@@ -1,13 +1,26 @@
 package converter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class OJBDefinition {
 	
 	private String doclet;
 	private List<String> jpaAnnotations = new ArrayList<>();
-	private List<String> imports = new ArrayList<>();;
+	private Set<String> imports = new HashSet<String>();
+	private String sourceCode;
+	
+	public OJBDefinition(String sourceCode) {
+		this.sourceCode = sourceCode;
+	}
+	
+	public String getSourceCode() {
+		return sourceCode;
+	}
 	
 	public String getDoclet() {
 		return doclet;
@@ -22,12 +35,35 @@ public abstract class OJBDefinition {
 		this.jpaAnnotations = jpaAnnotation;
 	}
 	
-	public void setImports(List<String> imports) {
+	public void setImports(Set<String> imports) {
 		this.imports = imports;
 	}
 	
-	public List<String> getImports() {
+	public Set<String> getImports() {
 		return imports;
+	}
+	
+	public boolean isAutoRetrieve() {
+		
+		return matches("auto-retrieve=\"true\"");
+	}
+	
+	public boolean isAutoDelete() {
+		
+		return matches("auto-delete=\"(object|true)\"");
+	}
+	
+	public boolean isAutoUpdateOrInsert() {
+		
+		return matches("auto-(?:update|insert)=\"(object|true)\"");
+	}
+	
+	protected boolean matches(String regex) {
+		
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(getDoclet());
+		
+		return matcher.find();
 	}
 	
 }

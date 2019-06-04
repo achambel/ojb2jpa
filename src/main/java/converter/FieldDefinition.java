@@ -49,7 +49,7 @@ public class FieldDefinition extends BaseDefinition {
 			String type = matcher.group(1);
 			
 			Class<? extends IOJBDefinition> clazz = ojbClassMapping.get(type);
-			IOJBDefinition ojbDef = clazz.newInstance();
+			IOJBDefinition ojbDef = clazz.getDeclaredConstructor(String.class).newInstance(sourceCode);
 			ojbDef.parse2JPA(doclet);
 			
 			return ojbDef;

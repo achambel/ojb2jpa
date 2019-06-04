@@ -7,6 +7,11 @@ import java.util.regex.Pattern;
 
 public class OJBFieldDefinition extends OJBDefinition implements IOJBDefinition {
 	
+	public OJBFieldDefinition(String sourceCode) {
+		
+		super(sourceCode);
+	}
+
 	@Override
 	public void parse2JPA(String doclet) {
 

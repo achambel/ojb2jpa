@@ -56,6 +56,20 @@ public class HelloWorld {
      */
 	private List<String> users;
 	
+	/**
+     * @ojb.reference     class-ref="com.aliquantum.objects.User"
+     *                     foreignkey="userIdentity"
+     *                      auto-update="false"
+     *                      auto-retrieve="true" proxy="true"
+     */
+    private Object user;
+
+    /**
+     * @ojb.field column="user_id"
+     *            jdbc-type="INTEGER"
+     */
+    private long userIdentity;
+	
 	public String getFirstField() {
 		return firstField;
 	}

@@ -20,7 +20,7 @@ public class OJBCollectionDefinitionTest {
 				"     * 				auto-retrieve=\"true\" proxy=\"true\"\n" + 
 				"     */";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition();
+		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
 		collection.parse2JPA(doclet);
 		
 		assertEquals(doclet, collection.getDoclet());
@@ -48,7 +48,7 @@ public class OJBCollectionDefinitionTest {
 				"     * 				auto-retrieve=\"false\" proxy=\"true\"\n" + 
 				"     */";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition();
+		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
 		collection.parse2JPA(doclet);
 		
 		assertEquals(doclet, collection.getDoclet());
@@ -69,7 +69,7 @@ public class OJBCollectionDefinitionTest {
 		
 		String doclet = "// just a single line comment";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition();
+		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
 		collection.parse2JPA(doclet);
 		
 		assertTrue(collection.getImports().isEmpty());

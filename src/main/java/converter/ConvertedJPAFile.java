@@ -6,14 +6,17 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ConvertedJPAFile {
 	
 	private String pathToSave;
-	private List<String> imports = new ArrayList<>();
+	private Set<String> imports = new HashSet<String>();
 	private String packageName;
 	private String className;
 	private String OJBFileContent;
@@ -266,7 +269,7 @@ public class ConvertedJPAFile {
 	}
 	
 	public List<String> getImports() {
-		return imports;
+		return imports.stream().sorted().collect(Collectors.toList());
 	}
 	
 	public Path getSourceFilePath() {

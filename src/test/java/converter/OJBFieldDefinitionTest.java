@@ -15,7 +15,7 @@ public class OJBFieldDefinitionTest {
 				"     *            jdbc-type=\"BLOB\"\n" + 
 				"     */";
 		
-		OJBFieldDefinition field = new OJBFieldDefinition();
+		OJBFieldDefinition field = new OJBFieldDefinition("");
 		field.parse2JPA(doclet);
 		
 		assertEquals(doclet, field.getDoclet());
@@ -38,7 +38,7 @@ public class OJBFieldDefinitionTest {
 				"     *            jdbc-type=\"VARCHAR\"\n" + 
 				"     */";
 		
-		OJBFieldDefinition field = new OJBFieldDefinition();
+		OJBFieldDefinition field = new OJBFieldDefinition("");
 		field.parse2JPA(doclet);
 		
 		assertEquals(doclet, field.getDoclet());
@@ -51,7 +51,7 @@ public class OJBFieldDefinitionTest {
 		
 		String doclet = "// just a single line comment";
 		
-		OJBFieldDefinition field = new OJBFieldDefinition();
+		OJBFieldDefinition field = new OJBFieldDefinition("");
 		field.parse2JPA(doclet);
 		
 		assertTrue(field.getImports().isEmpty());

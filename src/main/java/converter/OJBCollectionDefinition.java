@@ -7,6 +7,11 @@ import java.util.regex.Pattern;
 
 public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefinition {
 
+	public OJBCollectionDefinition(String sourceCode) {
+
+		super(sourceCode);
+	}
+
 	@Override
 	public void parse2JPA(String doclet) {
 
@@ -14,17 +19,14 @@ public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefini
 		
 		List<String> groups = new ArrayList<>();
 
-		Pattern pattern = Pattern.compile("element-class-ref=\"(.+)\"");
+		Pattern pattern = Pattern.compile("element-class-ref\\s*=\\s*\"(.+)\"");
 		Matcher matcher = pattern.matcher(doclet);
 		
 		if (matcher.find()) {
 			groups.add(String.format("targetEntity = %s.class", matcher.group(1)));
 		}
 		
-		pattern = Pattern.compile("auto-retrieve=\"true\"");
-		matcher = pattern.matcher(doclet);
-		
-		if (matcher.find()) {
+		if (isAutoRetrieve()) {
 			groups.add("fetch = FetchType.EAGER");
 		}
 		else if (groups.size() > 0) {
@@ -32,17 +34,12 @@ public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefini
 		}
 		
 		List<String> cascadeTypes = new ArrayList<>(); 
-		pattern = Pattern.compile("auto-delete=\"(object|true)\"");
-		matcher = pattern.matcher(doclet);
-		
-		if (matcher.find()) {
+				
+		if (isAutoDelete()) {
 			cascadeTypes.add("CascadeType.REMOVE");
 		}
-		
-		pattern = Pattern.compile("auto-(?:update|insert)=\"(object|true)\"");
-		matcher = pattern.matcher(doclet);
-		
-		if (matcher.find()) {
+			
+		if (isAutoUpdateOrInsert()) {
 			cascadeTypes.add("CascadeType.PERSIST");
 		}
 		

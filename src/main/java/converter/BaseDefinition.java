@@ -36,8 +36,8 @@ public abstract class BaseDefinition {
 			
 		}
 		
-		
-		if (annotations.size() != ((AnnotatedElement) member).getDeclaredAnnotations().length) {
+		// using less than because some annotations such as @SuppressWarnings does not appear in reflection
+		if (annotations.size() < ((AnnotatedElement) member).getDeclaredAnnotations().length) {
 			throw new Exception("Incorrect number of annotations for the field " + member.getName() + "Check the source code or regex used for capture them.");
 		}
 		

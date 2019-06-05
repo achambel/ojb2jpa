@@ -20,7 +20,7 @@ public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefini
 		
 		List<String> groups = new ArrayList<>();
 
-		Pattern pattern = Pattern.compile("element-class-ref\\s*=\\s*\"(.+)\"");
+		Pattern pattern = Pattern.compile("element-class-ref\\s*=\\s*\"(.+?)\"");
 		Matcher matcher = pattern.matcher(doclet);
 		
 		if (matcher.find()) {
@@ -60,7 +60,7 @@ public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefini
 			
 			if (hasOrderBy()) {
 				this.getImports().add("import javax.persistence.OrderBy;");
-				String orderBy = extractFirstGroup("orderby\\s*=\\s*\"(.+)\"", doclet);
+				String orderBy = extractFirstGroup("orderby\\s*=\\s*\"(.+?)\"", doclet);
 				orderBy = orderBy.replaceAll("=", " ");
 				String annotation = String.format("@OrderBy(\"%s\")", orderBy);
 				this.getJpaAnnotations().add(annotation);
@@ -72,7 +72,7 @@ public class OJBCollectionDefinition extends OJBDefinition implements IOJBDefini
 	
 	private boolean hasOrderBy() {
 		
-		final String regex = "orderby\\s*=\\s*\"(.+)\"";
+		final String regex = "orderby\\s*=\\s*\"(.+?)\"";
 		final Pattern pattern = Pattern.compile(regex);
 		final Matcher matcher = pattern.matcher(getDoclet());
 		

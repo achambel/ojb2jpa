@@ -13,7 +13,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ConvertedJPAFile {
+	
+	static final Logger logger = LoggerFactory.getLogger(ConvertedJPAFile.class);
 	
 	private String pathToSave;
 	private Set<String> imports = new HashSet<String>();
@@ -32,6 +37,8 @@ public class ConvertedJPAFile {
 	private String tableName;
 	
 	public ConvertedJPAFile(Path sourceFilePath, String pathToSave) throws Exception {
+		
+		logger.info("Converting class " + sourceFilePath);
 		
 		this.sourceFilePath = sourceFilePath;
 		this.pathToSave = pathToSave;
@@ -53,6 +60,7 @@ public class ConvertedJPAFile {
 	
 	private String assembleClass() {
 		
+		logger.info("Assembling class...");
 		StringBuilder code = new StringBuilder();
 		
 		code.append("\n\n/**\n");
@@ -99,7 +107,9 @@ public class ConvertedJPAFile {
 		String imports = String.join(newLine(1), getImports());
 		
 		code.insert(0, imports);
-		code.insert(0, getPackageName()+";"+newLine(2));
+		code.insert(0, "package "+getPackageName()+";"+newLine(2));
+		
+		logger.info("Parser finished for the class " + sourceFilePath);
 		
 		return code.toString();
 	}
@@ -122,17 +132,35 @@ public class ConvertedJPAFile {
 	
 	private void setClassInformation() throws Exception {
 		
+		logger.info("Looking for package name...");
 		setPackageName();
+		
+		logger.info("Looking for imports...");
 		setImports();
+		
+		logger.info("Looking for class name...");
 		setClassName();
 		
-		clazz =  Class.forName(getPackageName() + "." + getClassName());
+		String name = getPackageName() + "." + getClassName();
 		
+		logger.info("Getting new instance for " + name);
+		clazz =  Class.forName(name);
+		
+		logger.info("Looking for author...");
 		setAuthor();
+		
+		logger.info("Looking for version...");
 		setVersion();
+		
+		logger.info("Looking for Entity name...");
 		setTableName();
+		
 		setClassDefinitionName();
+		
+		logger.info("Looking for Fields...");
 		setFields();
+		
+		logger.info("Looking for Methods...");
 		setMethods();
 		
 	}
@@ -205,22 +233,33 @@ public class ConvertedJPAFile {
 			classDefinitionName = matcher.group(0);
 		}
 		else {
-			throw new Exception("Class definition not found for class name "+clazz.getSimpleName()+". Check the source code or regex.");
+			
+			String message = "Class definition not found for class name "+clazz.getSimpleName()+". Check the source code or regex.";
+			logger.error(message);
+			
+			throw new Exception(message);
 		}
 	}
 	
 	private void setFields() throws Exception {
 		
+		logger.info("Getting declared fields...");
+		
 		Field[] fields = clazz.getDeclaredFields();
+		
 		for (Field field : fields) {
-			
+			logger.info("Found field " + field.getName());
 			FieldDefinition fieldDefinition = new FieldDefinition(field, OJBFileContent);
 			OJBFields.add(fieldDefinition);
 		}
 		
+		logger.info("Total of declared fields added: " + OJBFields.size());
+		
 	}
 	
 	private void setMethods() throws Exception {
+		
+		logger.info("Getting declared methods...");
 		
 		Method[] methods = clazz.getDeclaredMethods();
 		for (Method method : methods) {
@@ -228,6 +267,8 @@ public class ConvertedJPAFile {
 			MethodDefinition methodDefinition = new MethodDefinition(method, OJBFileContent);
 			OJBMethods.add(methodDefinition);
 		}
+		
+		logger.info("Total of declared methods added: " + OJBMethods.size());
 		
 	}
 	

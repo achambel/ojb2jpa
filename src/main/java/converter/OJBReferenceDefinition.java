@@ -19,7 +19,7 @@ public class OJBReferenceDefinition extends OJBDefinition implements IOJBDefinit
 		
 		List<String> one2oneOptions = new ArrayList<>();
 		
-		String targetEntity = extractFirstGroup("class-ref\\s*=\\s*\"(.+)\"", doclet);
+		String targetEntity = extractFirstGroup("class-ref\\s*=\\s*\"(.+?)\"", doclet);
 		one2oneOptions.add(String.format("targetEntity = %s.class", targetEntity));
 		
 		if (isAutoRetrieve()) {
@@ -48,7 +48,7 @@ public class OJBReferenceDefinition extends OJBDefinition implements IOJBDefinit
 		this.getImports().add("import javax.persistence.OneToOne;");
 		this.getImports().add("import javax.persistence.FetchType;");
 		
-		String fk = extractFirstGroup("foreignkey\\s*=\\s*\"(.+)\"", doclet);
+		String fk = extractFirstGroup("foreignkey\\s*=\\s*\\\"(\\w+)\\\"", doclet);
 		String joinColumnDocLet = findDocletForField(fk);
 		String joinColumnName = getJoinColumnName(joinColumnDocLet);
 		
@@ -72,7 +72,7 @@ public class OJBReferenceDefinition extends OJBDefinition implements IOJBDefinit
 	
 	private String getJoinColumnName(String doclet) throws Exception {
 		
-		return extractFirstGroup("column\\s*=\\s*\"(.+)\"", doclet);	
+		return extractFirstGroup("column\\s*=\\s*\\\"(\\w+)\\\"", doclet);	
 		
 	}
 

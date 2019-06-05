@@ -6,8 +6,13 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FieldDefinition extends BaseDefinition {
-		
+
+	static final Logger logger = LoggerFactory.getLogger(FieldDefinition.class);
+	
 	private String doclet;
 	private String type;
 	private IOJBDefinition ojbDefinition;
@@ -81,10 +86,12 @@ public class FieldDefinition extends BaseDefinition {
 	
 	private String findRawCode() throws Exception {
 		
+		logger.info("Finding definition for field " + member.getName());
 		String fieldName = member.getName();
 		String rawCode = null;
 		
-		final String regex = String.format("(.+\\b%s\\b.+\\{(\\n?.|\\n)*?\\};\\s{2,})|(.+\\b%s\\b.*;$)", fieldName, fieldName);
+		final String regex = String.format("((\\w+\\s+)+\\b[A-Z]\\w+(?>\\[\\]){0,1}|(\\w+\\s+)+(boolean|byte\\[?\\]?|char\\[?\\]?|short|int|long|float|double))\\s+%s\\b(.+(\\s*\\{(\\n*.)*\\};)|\\s*;|.+;)", fieldName);
+		logger.info("Using REGEX " + regex);
 		final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
 		final Matcher matcher = pattern.matcher(sourceCode);
 		
@@ -93,7 +100,10 @@ public class FieldDefinition extends BaseDefinition {
 		}
 		
 		if (rawCode == null) {
-			throw new Exception("Field "+fieldName +" was not found. Check the source file or field name");
+			
+			String message = "Field "+fieldName +" was not found. Check regex or field name at source code\n\n"+sourceCode;
+			logger.error(message);
+			throw new Exception(message);
 		}
 		
 		return rawCode.trim();

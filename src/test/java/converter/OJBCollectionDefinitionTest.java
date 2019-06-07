@@ -1,6 +1,7 @@
 package converter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -20,21 +21,21 @@ public class OJBCollectionDefinitionTest {
 				"     * 				auto-retrieve=\"true\" proxy=\"true\"\n" + 
 				"     */";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
-		collection.parse2JPA(doclet);
+		OJBCollectionDefinition collection = new OJBCollectionDefinition(doclet);
 		
 		assertEquals(doclet, collection.getDoclet());
 		
-		assertEquals(3, collection.getImports().size());
+		assertEquals(3, collection.getJPAImports().size());
 		
-		assertTrue(collection.getImports().contains("import javax.persistence.OneToMany;"));
-		assertTrue(collection.getImports().contains("import javax.persistence.CascadeType;"));
-		assertTrue(collection.getImports().contains("import javax.persistence.FetchType;"));
+		assertTrue(collection.getJPAImports().contains("import javax.persistence.OneToMany;"));
+		assertTrue(collection.getJPAImports().contains("import javax.persistence.CascadeType;"));
+		assertTrue(collection.getJPAImports().contains("import javax.persistence.FetchType;"));
 		
 		String annotation = "@OneToMany(targetEntity = com.aliquantum.objects.UserDocumentUser.class, fetch = FetchType.EAGER, cascade = { CascadeType.REMOVE, CascadeType.PERSIST })";
-		assertEquals(annotation, collection.getJpaAnnotations().get(0));
+		assertTrue(collection.getJPAAnnotations().contains(annotation));
 		
-		assertEquals(1, collection.getJpaAnnotations().size());
+		assertEquals(1, collection.getJPAAnnotations().size());
+		assertTrue(collection.isCandidateForConvertion());
 		
 	}
 	
@@ -48,19 +49,17 @@ public class OJBCollectionDefinitionTest {
 				"     * 				auto-retrieve=\"false\" proxy=\"true\"\n" + 
 				"     */";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
-		collection.parse2JPA(doclet);
+		OJBCollectionDefinition collection = new OJBCollectionDefinition(doclet);
 		
 		assertEquals(doclet, collection.getDoclet());
 		
-		assertEquals(2, collection.getImports().size());
+		assertEquals(2, collection.getJPAImports().size());
 		
-		assertTrue(collection.getImports().contains("import javax.persistence.OneToMany;"));
-		assertTrue(collection.getImports().contains("import javax.persistence.FetchType;"));
+		assertTrue(collection.getJPAImports().contains("import javax.persistence.OneToMany;"));
+		assertTrue(collection.getJPAImports().contains("import javax.persistence.FetchType;"));
 		
 		String annotation = "@OneToMany(targetEntity = com.aliquantum.objects.UserDocumentUser.class, fetch = FetchType.LAZY)";
-		assertEquals(annotation, collection.getJpaAnnotations().get(0));
-		
+		assertTrue(collection.getJPAAnnotations().contains(annotation));
 		
 	}
 	
@@ -69,11 +68,11 @@ public class OJBCollectionDefinitionTest {
 		
 		String doclet = "// just a single line comment";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
-		collection.parse2JPA(doclet);
+		OJBCollectionDefinition collection = new OJBCollectionDefinition(doclet);
 		
-		assertTrue(collection.getImports().isEmpty());
-		assertTrue(collection.getJpaAnnotations().isEmpty());
+		assertTrue(collection.getJPAImports().isEmpty());
+		assertTrue(collection.getJPAAnnotations().isEmpty());
+		assertFalse(collection.isCandidateForConvertion());
 		
 	}
 	
@@ -89,11 +88,10 @@ public class OJBCollectionDefinitionTest {
 				"     * 				auto-retrieve=\"true\" proxy=\"true\"\n" + 
 				"     */";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
-		collection.parse2JPA(doclet);
+		OJBCollectionDefinition collection = new OJBCollectionDefinition(doclet);
 		
-		assertTrue(collection.getImports().contains("import javax.persistence.OrderBy;"));
-		assertTrue(collection.getJpaAnnotations().contains("@OrderBy(\"displaySequence ASC\")"));
+		assertTrue(collection.getJPAImports().contains("import javax.persistence.OrderBy;"));
+		assertTrue(collection.getJPAAnnotations().contains("@OrderBy(\"displaySequence ASC\")"));
 		
 	}
 

@@ -1,78 +1,95 @@
 package converter;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Member;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public abstract class BaseDefinition {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-	protected String rawCode;
-	protected String sourceCode;
-	protected Member member;
-	protected List<String> annotations = new ArrayList<>();
+public abstract class BaseDefinition implements IDefinition {
 	
-	protected List<String> findAnnotations() throws Exception {
+	private static final Logger logger = LoggerFactory.getLogger(BaseDefinition.class);
+	
+	protected String doclet;
+	protected Set<String> jpaAnnotations = new HashSet<String>();
+	protected Set<String> jpaImports = new HashSet<String>();
+	protected String sourceCode;
+	
+	public BaseDefinition(String doclet, String sourceCode) {
 		
-		final String regex = String.format("(@.+(?>@.+|[\\s])*?).+(?=%s)", Pattern.quote(rawCode.trim()));
+		this.doclet = doclet;
+		this.sourceCode = sourceCode;
+		
+		findDefinition();
+	}
+	
+	public String getDoclet() {
+		return doclet;
+	}
+	
+	public void setDoclet(String doclet) {
+		this.doclet = doclet;
+	}
+	
+	public Set<String> getJPAAnnotations() {
+		return jpaAnnotations;
+	}
+	
+	public void setJPAAnnotations(Set<String> jpaAnnotations) {
+		this.jpaAnnotations = jpaAnnotations;
+	}
+	
+	public Set<String> getJPAImports() {
+		return jpaImports;
+	}
+	
+	public void setJPAImports(Set<String> jpaImports) {
+		this.jpaImports = jpaImports;
+	}
+	
+	public boolean isAutoRetrieve() {
+		
+		return matches("auto-retrieve=\"true\"");
+	}
+	
+	public boolean isAutoDelete() {
+		
+		return matches("auto-delete=\"(object|true)\"");
+	}
+	
+	public boolean isAutoUpdateOrInsert() {
+		
+		return matches("auto-(?:update|insert)=\"(object|true)\"");
+	}
+	
+	protected boolean matches(String regex) {
+		
 		final Pattern pattern = Pattern.compile(regex);
-		final Matcher matcher = pattern.matcher(sourceCode);
+		final Matcher matcher = pattern.matcher(getDoclet());
 		
-		List<String> annotations = new ArrayList<>();
+		return matcher.find();
+	}
+	
+	protected String extractFirstGroup(String regex, String str) {
+		
+		final Pattern pattern = Pattern.compile(regex);
+		final Matcher matcher = pattern.matcher(str);
 		
 		if (matcher.find()) {
-			String allAnnotations = matcher.group(1);
 			
-			final String annotationRegex = "@.+";
-			final Pattern annotationPattern = Pattern.compile(annotationRegex);
-			final Matcher annotationMatcher = annotationPattern.matcher(allAnnotations);
-			
-			while (annotationMatcher.find()) {
-				annotations.add(annotationMatcher.group(0).trim());
-			}
-			
+			return matcher.group(1);
 		}
 		
-		// using less than because some annotations such as @SuppressWarnings does not appear in reflection
-		if (annotations.size() < ((AnnotatedElement) member).getDeclaredAnnotations().length) {
-			throw new Exception("Incorrect number of annotations for the field " + member.getName() + "Check the source code or regex used for capture them.");
-		}
+		logger.warn("First group not found at regex " + regex + " in " + str);
 		
-		for (Annotation a : ((AnnotatedElement) member).getDeclaredAnnotations()) {
-			
-			String name = "@"+a.annotationType().getSimpleName();
-			boolean isCaptured = annotations.stream().anyMatch(str -> str.startsWith(name));
-			
-			if (!isCaptured) {
-				throw new Exception("Annotation " + name + " was not found. It means that annotation exists in the source code but not in the parsed code.");
-			}
-		}
-		
-		return annotations;
+		return "";
 	}
 	
-	public Member getMember() {
-		return member;
-	}
-	
-	public String getRawCode() {
-		return rawCode;
+	public String getSourceCode() {
+		
+		return sourceCode;
 	}
 
-	public List<String> getAnnotations() {
-		return annotations;
-	}
-
-	public boolean hasAnnotations() {
-		return annotations.size() > 0;
-	}
-	
-	@Override
-	public String toString() {
-		
-		return member.getName();
-	}
 }

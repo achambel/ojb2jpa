@@ -1,8 +1,11 @@
 package converter;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.Test;
@@ -38,6 +41,24 @@ public class OJBJPATest {
 		List<?> listOfJavaSourceFiles = converter.listSourceFiles();
 		assertTrue(listOfJavaSourceFiles.size() > 0);
 		
+	}
+	
+	@Test
+	public void converterTest() throws Exception {
+		
+		OJB2JPA converter = new OJB2JPA(sourceFolderPath);
+		
+		converter.convert(pathToSave);
+		assertEquals(1, converter.getJPAFiles().size());
+		
+		converter.write();
+		
+		for(ConvertedJPAFile jpaFile : converter.getJPAFiles()) {
+			
+			Path path = Paths.get(pathToSave, jpaFile.getClassName()+".java");
+			
+			assertTrue(path.toFile().isFile());
+		}
 	}
 	
 }

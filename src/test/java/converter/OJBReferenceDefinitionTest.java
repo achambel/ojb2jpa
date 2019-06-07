@@ -1,6 +1,7 @@
 package converter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -37,24 +38,23 @@ public class OJBReferenceDefinitionTest {
 				"     *                      auto-retrieve=\"true\" proxy=\"true\"\n" + 
 				"     */";
 		
-		OJBReferenceDefinition reference = new OJBReferenceDefinition(sourceCode);
-		reference.parse2JPA(doclet);
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode);
 		
 		assertEquals(doclet, reference.getDoclet());
 		
-		assertEquals(3, reference.getImports().size());
+		assertEquals(3, reference.getJPAImports().size());
 		
-		assertTrue(reference.getImports().contains("import javax.persistence.OneToOne;"));
-		assertTrue(reference.getImports().contains("import javax.persistence.JoinColumn;"));
-		assertTrue(reference.getImports().contains("import javax.persistence.FetchType;"));
+		assertTrue(reference.getJPAImports().contains("import javax.persistence.OneToOne;"));
+		assertTrue(reference.getJPAImports().contains("import javax.persistence.JoinColumn;"));
+		assertTrue(reference.getJPAImports().contains("import javax.persistence.FetchType;"));
 		
 		String one2oneAnnotation = "@OneToOne(targetEntity = com.aliquantum.objects.User.class, fetch = FetchType.EAGER)";
-		assertTrue(reference.getJpaAnnotations().contains(one2oneAnnotation));
+		assertTrue(reference.getJPAAnnotations().contains(one2oneAnnotation));
 		
 		String joinColumnAnnotation = "@JoinColumn(name = \"user_id\")";
-		assertTrue(reference.getJpaAnnotations().contains(joinColumnAnnotation));
+		assertTrue(reference.getJPAAnnotations().contains(joinColumnAnnotation));
 		
-		assertEquals(2, reference.getJpaAnnotations().size());
+		assertEquals(2, reference.getJPAAnnotations().size());
 		
 	}
 	
@@ -67,13 +67,12 @@ public class OJBReferenceDefinitionTest {
 				"     *                    auto-update=\"false\"\n" +  
 				"     */";
 		
-		OJBReferenceDefinition reference = new OJBReferenceDefinition(sourceCode);
-		reference.parse2JPA(doclet);
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode);
 		
 		assertEquals(doclet, reference.getDoclet());
 		
 		String one2oneAnnotation = "@OneToOne(targetEntity = com.aliquantum.objects.User.class, fetch = FetchType.LAZY)";
-		assertTrue(reference.getJpaAnnotations().contains(one2oneAnnotation));
+		assertTrue(reference.getJPAAnnotations().contains(one2oneAnnotation));
 	}
 	
 	@Test
@@ -88,16 +87,15 @@ public class OJBReferenceDefinitionTest {
 				"     *                    auto-retrieve=\"true\"\n" +
 				"     */";
 		
-		OJBReferenceDefinition reference = new OJBReferenceDefinition(sourceCode);
-		reference.parse2JPA(doclet);
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode);
 		
 		assertEquals(doclet, reference.getDoclet());
 		
 		String one2oneAnnotation = "@OneToOne(targetEntity = com.aliquantum.objects.User.class, fetch = FetchType.EAGER, cascade = { CascadeType.REMOVE, CascadeType.PERSIST })";
-		assertTrue(reference.getJpaAnnotations().contains(one2oneAnnotation));
+		assertTrue(reference.getJPAAnnotations().contains(one2oneAnnotation));
 		
-		assertTrue(reference.getImports().contains("import javax.persistence.CascadeType;"));
-		assertEquals(4, reference.getImports().size());
+		assertTrue(reference.getJPAImports().contains("import javax.persistence.CascadeType;"));
+		assertEquals(4, reference.getJPAImports().size());
 	}
 	
 	@Test
@@ -105,11 +103,11 @@ public class OJBReferenceDefinitionTest {
 		
 		String doclet = "// just a single line comment";
 		
-		OJBCollectionDefinition collection = new OJBCollectionDefinition("");
-		collection.parse2JPA(doclet);
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, "");
 		
-		assertTrue(collection.getImports().isEmpty());
-		assertTrue(collection.getJpaAnnotations().isEmpty());
+		assertTrue(reference.getJPAImports().isEmpty());
+		assertTrue(reference.getJPAAnnotations().isEmpty());
+		assertFalse(reference.isCandidateForConvertion());
 		
 	}
 

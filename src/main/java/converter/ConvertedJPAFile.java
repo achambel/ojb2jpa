@@ -2,10 +2,9 @@ package converter;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,24 +17,20 @@ import org.slf4j.LoggerFactory;
 
 public class ConvertedJPAFile {
 	
-	static final Logger logger = LoggerFactory.getLogger(ConvertedJPAFile.class);
+	private static final Logger logger = LoggerFactory.getLogger(ConvertedJPAFile.class);
 	
 	private String pathToSave;
 	private Set<String> imports = new HashSet<String>();
 	private String packageName;
 	private String className;
 	private String OJBFileContent;
-	private List<FieldDefinition> OJBFields = new ArrayList<>();
-	private List<MethodDefinition> OJBMethods = new ArrayList<>();
 	private Path sourceFilePath;
-	private String convertedCode;
 	private Class<?> clazz;
-	private String classDefinitionName;
-	private String author = "";
-	private String version = "";
 	
-	private String tableName;
+	private List<String> skippedClasses = Arrays.asList("BaseIdentifieableVO", "BaseVO");
 	
+	private String target;
+		
 	public ConvertedJPAFile(Path sourceFilePath, String pathToSave) throws Exception {
 		
 		logger.info("Converting class " + sourceFilePath);
@@ -50,250 +45,114 @@ public class ConvertedJPAFile {
 		try {
 			String fileContent = new String(Files.readAllBytes(sourceFilePath));
 			this.OJBFileContent = fileContent;
-			setClassInformation();
-			this.convertedCode = assembleClass();
+			this.target = String.copyValueOf(OJBFileContent.toCharArray());
+			setClassName();
+			
+			if(isSkippedClass()) {
+				logger.warn("Skipping conversion due to class " + getClassName() + " was added in skipped classes list.");
+			} else {
+				setClassInformation();
+			}
 			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private String assembleClass() {
-		
-		logger.info("Assembling class...");
-		StringBuilder code = new StringBuilder();
-		
-		code.append("\n\n/**\n");
-		code.append(String.format(" * @author %s\n", getAuthor()));
-		code.append(String.format(" * @version %s\n", getVersion()));
-		code.append(" * Class converted from OJB to JPA. May it needs to double check.\n");
-		code.append(" */\n");
-		
-		code.append("\n");
-		code.append("@Entity\n");
-		code.append(String.format("@Table(name=\"%s\")%n", getTableName()));
-		code.append(getClassDefinitionName()+newLine(2));
-		
-		for (FieldDefinition field : OJBFields) {
-			
-			List<String> annotations = new ArrayList<>();
-			
-			if (field.hasAnnotations()) annotations.addAll(field.getAnnotations());
-			
-			if (field.hasOJBDefinition()) { 
-				annotations.addAll(field.getOJBDefinition().getJpaAnnotations());
-				imports.addAll(field.getOJBDefinition().getImports());
-			}
+	private boolean isSkippedClass() {
+		return this.skippedClasses.contains(getClassName());
+	}
 
-			annotations.forEach(a -> {
-				code.append(String.format("\t%s\n", a));
-			});
-			
-			code.append("\t"+field.rawCode+newLine(2));
-		}
-		
-		for (MethodDefinition method : OJBMethods) {
-			
-			method.getAnnotations().forEach(a -> {
-				code.append(String.format("\t%s\n", a));
-			});
-			
-			code.append("\t"+method.getSignature());
-			code.append(" "+method.rawCode+newLine(2));
-		}
-		
-		code.append("}");
-		
-		String imports = String.join(newLine(1), getImports());
-		
-		code.insert(0, imports);
-		code.insert(0, "package "+getPackageName()+";"+newLine(2));
-		
-		logger.info("Parser finished for the class " + sourceFilePath);
-		
-		return code.toString();
-	}
-	
-	private String newLine(int amount) {
-		
-		String lines = "";
-		
-		for (int i = 1; i <= amount; i++) {
-			lines = lines.concat(System.lineSeparator());
-		}
-		
-		return lines;
-	}
 	
 	public String printConvertedClass( ) {
 		
-		return this.convertedCode;
+		return this.target;
 	}
 	
 	private void setClassInformation() throws Exception {
 		
+		setEntity();
+		
 		logger.info("Looking for package name...");
 		setPackageName();
 		
-		logger.info("Looking for imports...");
-		setImports();
-		
-		logger.info("Looking for class name...");
-		setClassName();
-		
-		String name = getPackageName() + "." + getClassName();
+		final String regex = "package\\s+|;$";
+		String name = getPackageName().replaceAll(regex, "") + "." + getClassName();
 		
 		logger.info("Getting new instance for " + name);
 		clazz =  Class.forName(name);
 		
-		logger.info("Looking for author...");
-		setAuthor();
-		
-		logger.info("Looking for version...");
-		setVersion();
-		
-		logger.info("Looking for Entity name...");
-		setTableName();
-		
-		setClassDefinitionName();
-		
-		logger.info("Looking for Fields...");
 		setFields();
 		
-		logger.info("Looking for Methods...");
-		setMethods();
+		List<String> printableImports = getImports();
+		printableImports.add(0, getPackageName()+"\n");
+		
+		target = target.replace(getPackageName(), String.join("\n", printableImports));
+		
+		logger.info("Parser finished for file " + sourceFilePath);
 		
 	}
 	
-	public String getTableName() {
-		
-		return tableName;
-	}
-	
-	private void setTableName() throws Exception {
-		
-		final String regex = "@ojb\\.class(?:.+|\\s*.+)table\\s*=\\s*\"(.+)\"";
-		final Pattern pattern = Pattern.compile(regex);
-		final Matcher matcher = pattern.matcher(OJBFileContent);
-		
-		if (matcher.find()) {
-			
-			tableName = matcher.group(1);
-			
-			imports.add("import javax.persistence.Entity;");
-			imports.add("import javax.persistence.Table;");
-		}
-		else {
-			throw new Exception("Table name not found in class "+getClassName()+". Check the source code or regex");
-		}
-		
-	}
-	
-	public String getVersion() {
-		return version;
-	}
-	
-	private void setVersion() {
-		
-		final Pattern pattern = Pattern.compile("@version(.+)");
-		Matcher matcher = pattern.matcher(OJBFileContent);
+	private void setFields() {
 
-		if (matcher.find()) {
-			version = matcher.group(1).trim();
-		}
-	}
-	
-	public String getAuthor() {
-		
-		return author;
-	}
-	
-	private void setAuthor() {
-		
-		final Pattern pattern = Pattern.compile("@author(.+)");
-		Matcher matcher = pattern.matcher(OJBFileContent);
-
-		if (matcher.find()) {
-			author = matcher.group(1).trim();
-		}
-	}
-	
-	public String getClassDefinitionName() {
-		
-		return classDefinitionName;
-	}
-	
-	private void setClassDefinitionName() throws Exception {
-		
-		final String regex = String.format(".+class\\s+\\b%s\\b.+\\{", clazz.getSimpleName());
-		final Pattern pattern = Pattern.compile(regex);
-		final Matcher matcher = pattern.matcher(OJBFileContent);
-		
-		if (matcher.find()) {
-			classDefinitionName = matcher.group(0);
-		}
-		else {
-			
-			String message = "Class definition not found for class name "+clazz.getSimpleName()+". Check the source code or regex.";
-			logger.error(message);
-			
-			throw new Exception(message);
-		}
-	}
-	
-	private void setFields() throws Exception {
-		
 		logger.info("Getting declared fields...");
 		
 		Field[] fields = clazz.getDeclaredFields();
+		logger.info("Total of fields in this class: " + fields.length);
 		
 		for (Field field : fields) {
-			logger.info("Found field " + field.getName());
-			FieldDefinition fieldDefinition = new FieldDefinition(field, OJBFileContent);
-			OJBFields.add(fieldDefinition);
-		}
-		
-		logger.info("Total of declared fields added: " + OJBFields.size());
-		
-	}
-	
-	private void setMethods() throws Exception {
-		
-		logger.info("Getting declared methods...");
-		
-		Method[] methods = clazz.getDeclaredMethods();
-		for (Method method : methods) {
 			
-			MethodDefinition methodDefinition = new MethodDefinition(method, OJBFileContent);
-			OJBMethods.add(methodDefinition);
+			logger.info("Found field " + field.getName());
+			
+			String docletForField = OJB2JPA.findDoclet(field.getName(), OJBFileContent);
+			
+			if (docletForField.isEmpty()) {
+				logger.warn("No doclet has been found for the field " + field.getName());
+			}
+			else {
+				FieldDefinition fieldDefinition = new FieldDefinition(docletForField, OJBFileContent);
+				if (fieldDefinition.isCandidateForConvertion()) {
+					
+					target = target.replace(docletForField, String.join("\n\t", fieldDefinition.getJPAAnnotations()));
+					imports.addAll(fieldDefinition.getJPAImports());
+				}
+			}
+			
 		}
 		
-		logger.info("Total of declared methods added: " + OJBMethods.size());
+		logger.info("No more field to find any definition in this class.");
+		
+	}
+
+	private void setEntity() throws Exception {
+
+		String surround = String.format("class\\s+%s", getClassName());
+		String docletForEntity = OJB2JPA.findDoclet(surround, OJBFileContent);
+		
+		ClassDefinition classDefinition = new ClassDefinition(docletForEntity);
+		
+		if (classDefinition.isCandidateForConvertion()) {
+			target = target.replace(docletForEntity, String.join("\n", classDefinition.getJPAAnnotations()));
+			imports.addAll(classDefinition.getJPAImports());
+		}
+		else {
+			
+			String message = "Entity not found in class "+getClassName()+". Check the regex, make sure this class is an Entity or if not, include it to skip classes method.\n\n" + OJBFileContent;
+			logger.error(message);
+			throw new Exception(message);
+		}
 		
 	}
 	
-
-	private void setImports() {
-		
-		final String regex = "import\\s+[\\w.]+;";
-		final Pattern pattern = Pattern.compile(regex);
-		final Matcher matcher = pattern.matcher(this.OJBFileContent);
-		
-		while (matcher.find()) {
-			imports.add(matcher.group(0));
-		}
-		
-	}
-
 	private void setPackageName() {
 		
-		String regex = "(?:package\\s+)(.+);";
+		String regex = "^package\\s+.+;";
 		Pattern pattern = Pattern.compile(regex);
 		
 		Matcher matcher = pattern.matcher(this.OJBFileContent);
 		
 		if (matcher.find()) {
-			this.packageName = matcher.group(1);
+			this.packageName = matcher.group(0);
 		}
 	}
 	
@@ -332,16 +191,6 @@ public class ConvertedJPAFile {
 
 	public void setOJBFileContent(String oJBFileContent) {
 		OJBFileContent = oJBFileContent;
-	}
-
-
-	public List<FieldDefinition> getOJBFields() {
-		return OJBFields;
-	}
-
-
-	public List<MethodDefinition> getOJBMethods() {
-		return OJBMethods;
 	}
 	
 }

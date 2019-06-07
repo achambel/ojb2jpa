@@ -59,7 +59,7 @@ public class ConvertedJPAFile {
 		}
 	}
 	
-	private boolean isSkippedClass() {
+	public boolean isSkippedClass() {
 		return this.skippedClasses.contains(getClassName());
 	}
 

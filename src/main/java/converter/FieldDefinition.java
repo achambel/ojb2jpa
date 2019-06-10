@@ -6,6 +6,11 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public class FieldDefinition extends BaseDefinition {
 
 	static final Logger logger = LoggerFactory.getLogger(FieldDefinition.class);
@@ -45,6 +50,9 @@ public class FieldDefinition extends BaseDefinition {
 			else {
 				logger.error("OJB definition was detected, however no class to map it. Check your missing implementation.");
 			}
+		}
+		else {
+			logger.warn("This field is not candidate for convertion. Check regex or source code if necessary.");
 		}
 		
 	}

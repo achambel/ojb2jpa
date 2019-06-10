@@ -7,6 +7,11 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public abstract class OJBDefinition {
 	
 	private String doclet;

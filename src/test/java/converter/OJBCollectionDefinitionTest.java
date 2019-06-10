@@ -6,6 +6,11 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public class OJBCollectionDefinitionTest {
 	
 	@Test

@@ -8,6 +8,11 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public abstract class BaseDefinition implements IDefinition {
 	
 	private static final Logger logger = LoggerFactory.getLogger(BaseDefinition.class);

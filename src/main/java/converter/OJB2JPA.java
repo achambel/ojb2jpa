@@ -10,13 +10,17 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import converter.errors.OJB2JPAPathNotFoundException;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public class OJB2JPA {
 
 	private static final Logger logger = LoggerFactory.getLogger(OJB2JPA.class);
@@ -36,11 +40,6 @@ public class OJB2JPA {
 
 	}
 
-	public List<Path> listSourceFiles() {
-
-		return StreamSupport.stream(this.sourceFiles.spliterator(), false).collect(Collectors.toList());
-	}
-
 	public void convert(String pathToSave) throws Exception {
 
 		for (Path srcPath : sourceFiles) {
@@ -49,6 +48,21 @@ public class OJB2JPA {
 			convertedJPAFiles.add(jpaFile);
 
 		}
+		
+		logger.info("The convertion of OJB files to JPA has been finished.");
+		
+		List<ConvertedJPAFile> skippedFiles = convertedJPAFiles.stream().filter(c -> c.isSkippedClass()).collect(Collectors.toList());
+		
+		String strOfSkippedFiles = skippedFiles
+											.stream()
+											.map(f -> f.getClassName())
+											.collect(Collectors.joining(", "));
+		
+		int convertedFiles = convertedJPAFiles.size() - skippedFiles.size();
+		
+		logger.info("Total of source files converted: " + convertedFiles);
+		logger.info("Total of skipped classes: " + skippedFiles.size());
+		logger.info("These classes were skipped: [" + strOfSkippedFiles + "]");
 
 	}
 
@@ -64,7 +78,7 @@ public class OJB2JPA {
 				byte[] content = jpaFile.printConvertedClass().getBytes();
 
 				try {
-					logger.info("Saving file " + file);
+					logger.info("Saving file to " + file);
 					Files.write(file, content);
 				} catch (IOException e) {
 

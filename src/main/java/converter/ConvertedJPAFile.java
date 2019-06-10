@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public class ConvertedJPAFile {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ConvertedJPAFile.class);

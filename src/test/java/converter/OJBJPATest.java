@@ -6,17 +6,21 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.junit.Test;
 
 import converter.errors.OJB2JPAPathNotFoundException;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public class OJBJPATest {
 	
 	private final String basePath = System.getProperty("user.dir");
 	private final String sourceFolderPath = basePath + "/src/test/java/converter/resources/classes";
-	private final String pathToSave = "/tmp/ojb2jpa/convertedFiles";
+	private final String pathToSave = System.getProperty("java.io.tmpdir") + "/ojb2jpa/convertedFiles";
 	
 	@Test
 	public void sourceAndByteCodeFolderShouldExist() {
@@ -34,16 +38,6 @@ public class OJBJPATest {
 	}
 	
 	@Test
-	public void shouldGetAListOfJavaSourceFiles() throws OJB2JPAPathNotFoundException {
-		
-		OJB2JPA converter = new OJB2JPA(sourceFolderPath);
-		
-		List<?> listOfJavaSourceFiles = converter.listSourceFiles();
-		assertTrue(listOfJavaSourceFiles.size() > 0);
-		
-	}
-	
-	@Test
 	public void converterTest() throws Exception {
 		
 		OJB2JPA converter = new OJB2JPA(sourceFolderPath);
@@ -57,7 +51,9 @@ public class OJBJPATest {
 			
 			Path path = Paths.get(pathToSave, jpaFile.getClassName()+".java");
 			
-			assertTrue(path.toFile().isFile());
+			if (!jpaFile.isSkippedClass()) {
+				assertTrue(path.toFile().isFile());
+			}
 		}
 	}
 	

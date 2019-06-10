@@ -9,12 +9,17 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
+/**
+ * 
+ * @author Adriano Chambel <acmlima.softweb@gmail.com>
+ *
+ */
 public class ConvertedJPAFileTest {
 
 	private final String basePath = System.getProperty("user.dir");
 	private final String sourceFilePath = basePath + "/src/test/java/converter/resources/classes/HelloWorld.java";
-	String pathToSave = "/tmp/ojb2jpa/convertedFiles";
-
+	String pathToSave = System.getProperty("java.io.tmpdir") + "/ojb2jpa/convertedFiles";
+	
 	@Test
 	public void convertedJPAFileTest() throws Exception {
 
@@ -38,7 +43,11 @@ public class ConvertedJPAFileTest {
 
 		for (Path path : directoryContent) {
 			ConvertedJPAFile jpaFile = new ConvertedJPAFile(path, pathToSave);
-			System.out.println(jpaFile.getClassName());
+			
+			Path destPath = Paths.get(jpaFile.getPathToSave(), jpaFile.getClassName()+".java");
+			
+			assertEquals(path.getFileName(), destPath.getFileName());
+			
 		}
 
 	}

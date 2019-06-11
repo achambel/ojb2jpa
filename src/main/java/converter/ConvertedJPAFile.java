@@ -88,6 +88,7 @@ public class ConvertedJPAFile {
 		clazz =  Class.forName(name);
 		
 		setFields();
+		replaceOJBCollections();
 		
 		List<String> printableImports = getImports();
 		printableImports.add(0, getPackageName()+"\n");
@@ -98,6 +99,19 @@ public class ConvertedJPAFile {
 		
 	}
 	
+	private void replaceOJBCollections() {
+
+		final String regex = "new\\s+(ManageableArrayList|RemovalAwareCollection|RemovalAwareList)(\\(|<).+;";
+		target = target.replaceAll(regex, "new ArrayList<>();");
+		
+		final String importRegex = "(?m)^import org.apache\\.ojb\\.broker\\.util\\.collections\\.(ManageableArrayList|RemovalAwareCollection|RemovalAwareList);$";
+		target = target.replaceAll(importRegex, "");
+		target = target.replaceAll("(?m)^import\\s+java\\.util\\.ArrayList;$", "");
+		
+		imports.add("import java.util.ArrayList;");
+		
+	}
+
 	private void setFields() {
 
 		logger.info("Getting declared fields...");

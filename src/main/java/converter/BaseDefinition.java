@@ -1,5 +1,6 @@
 package converter;
 
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -21,13 +22,25 @@ public abstract class BaseDefinition implements IDefinition {
 	protected Set<String> jpaAnnotations = new HashSet<String>();
 	protected Set<String> jpaImports = new HashSet<String>();
 	protected String sourceCode;
+	protected Path sourceFilePath;
+	protected String fieldName;
 	
-	public BaseDefinition(String doclet, String sourceCode) {
+	public BaseDefinition(String doclet, String sourceCode, Path sourceFilePath, String fieldName) {
 		
 		this.doclet = doclet;
 		this.sourceCode = sourceCode;
+		this.sourceFilePath = sourceFilePath;
+		this.fieldName = fieldName;
 		
 		findDefinition();
+	}
+	
+	public String getFieldName() {
+		return fieldName;
+	}
+	
+	public Path getSourceFilePath() {
+		return sourceFilePath;
 	}
 	
 	public String getDoclet() {
@@ -67,6 +80,10 @@ public abstract class BaseDefinition implements IDefinition {
 	public boolean isAutoUpdateOrInsert() {
 		
 		return matches("auto-(?:update|insert)=\"(object|true)\"");
+	}
+	
+	public boolean isProxy() {
+		return matches("proxy=\"true\"");
 	}
 	
 	protected boolean matches(String regex) {

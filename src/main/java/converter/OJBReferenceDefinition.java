@@ -1,5 +1,6 @@
 package converter;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,8 +18,8 @@ public class OJBReferenceDefinition extends BaseDefinition {
 
 	static final Logger logger = LoggerFactory.getLogger(OJBReferenceDefinition.class);
 
-	public OJBReferenceDefinition(String doclet, String sourceCode) {
-		super(doclet, sourceCode);
+	public OJBReferenceDefinition(String doclet, String sourceCode, Path sourceFilePath) {
+		super(doclet, sourceCode, sourceFilePath, null);
 	}
 
 	@Override
@@ -31,7 +32,10 @@ public class OJBReferenceDefinition extends BaseDefinition {
 			one2oneOptions.add(String.format("targetEntity = %s.class", targetEntity));
 		}
 
-		if (isAutoRetrieve()) {
+		if (isProxy()) {
+			one2oneOptions.add("fetch = FetchType.LAZY");
+		}
+		else if (isAutoRetrieve() && !isProxy()) {
 			one2oneOptions.add("fetch = FetchType.EAGER");
 		} else if (one2oneOptions.size() > 0) {
 			one2oneOptions.add("fetch = FetchType.LAZY");

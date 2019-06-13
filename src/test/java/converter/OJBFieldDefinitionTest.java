@@ -4,6 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.junit.Test;
 
 /**
@@ -13,6 +18,8 @@ import org.junit.Test;
  */
 public class OJBFieldDefinitionTest {
 	
+	private final String basePath = System.getProperty("user.dir");
+	
 	@Test
 	public void columnAnnotationWithNameTest() {
 		
@@ -21,7 +28,7 @@ public class OJBFieldDefinitionTest {
 				"     *            jdbc-type=\"BLOB\"\n" + 
 				"     */";
 		
-		OJBFieldDefinition field = new OJBFieldDefinition(doclet);
+		OJBFieldDefinition field = new OJBFieldDefinition(doclet, "", null, "");
 		
 		assertEquals(doclet, field.getDoclet());
 		
@@ -45,7 +52,7 @@ public class OJBFieldDefinitionTest {
 				"     *            jdbc-type=\"VARCHAR\"\n" + 
 				"     */";
 		
-		OJBFieldDefinition field = new OJBFieldDefinition(doclet);
+		OJBFieldDefinition field = new OJBFieldDefinition(doclet, "", null, "");
 		assertEquals(doclet, field.getDoclet());
 		
 		assertTrue(field.getJPAAnnotations().contains("@Column(name = \"document_type\", length = 50)"));
@@ -56,12 +63,48 @@ public class OJBFieldDefinitionTest {
 		
 		String doclet = "// just a single line comment";
 		
-		OJBFieldDefinition field = new OJBFieldDefinition(doclet);
+		OJBFieldDefinition field = new OJBFieldDefinition(doclet, "", null, "");
 		
 		assertTrue(field.getJPAImports().isEmpty());
 		assertTrue(field.getJPAAnnotations().isEmpty());
 		assertFalse(field.isCandidateForConvertion());
 		
+	}
+	
+	@Test
+	public void columnAnnotationNoInsertableOrUpdatable() throws IOException {
+		
+		Path sourceFilePath = Paths.get(basePath, "/src/test/java/converter/resources/classes/AccountNote.java");
+		String fileContent = new String(Files.readAllBytes(sourceFilePath));
+		
+		String fieldName = "accountIdentity";
+		String doclet = OJB2JPA.findDoclet(fieldName, fileContent);
+		
+		
+		OJBFieldDefinition field = new OJBFieldDefinition(doclet, fileContent, sourceFilePath, fieldName);
+		
+		assertEquals(doclet, field.getDoclet());
+		
+		String columnAnnotation = "@Column(name = \"ACCOUNT_ID\", insertable = false, updatable = false)";
+		assertTrue(field.jpaAnnotations.contains(columnAnnotation));
+	}
+	
+	@Test
+	public void columnAnnotation() throws IOException {
+		
+		Path sourceFilePath = Paths.get(basePath, "/src/test/java/converter/resources/classes/AccountNote.java");
+		String fileContent = new String(Files.readAllBytes(sourceFilePath));
+		
+		String fieldName = "activated";
+		String doclet = OJB2JPA.findDoclet(fieldName, fileContent);
+		
+		
+		OJBFieldDefinition field = new OJBFieldDefinition(doclet, fileContent, sourceFilePath, fieldName);
+		
+		assertEquals(doclet, field.getDoclet());
+		
+		String columnAnnotation = "@Column(name = \"activated\")";
+		assertTrue(field.jpaAnnotations.contains(columnAnnotation));
 	}
 
 }

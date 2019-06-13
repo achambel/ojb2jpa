@@ -134,7 +134,7 @@ public class ConvertedJPAFile {
 			if (docletForField.isEmpty()) {
 				logger.warn("No doclet has been found for the field " + field.getName());
 			} else {
-				FieldDefinition fieldDefinition = new FieldDefinition(docletForField, OJBFileContent);
+				FieldDefinition fieldDefinition = new FieldDefinition(docletForField, OJBFileContent, this.sourceFilePath, field.getName());
 				if (fieldDefinition.isCandidateForConvertion()) {
 
 					target = target.replace(docletForField, String.join("\n\t", fieldDefinition.getJPAAnnotations()));

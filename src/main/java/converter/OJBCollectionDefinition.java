@@ -1,5 +1,9 @@
 package converter;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,8 +21,8 @@ public class OJBCollectionDefinition extends BaseDefinition {
 
 	static final Logger logger = LoggerFactory.getLogger(OJBCollectionDefinition.class);
 	
-	public OJBCollectionDefinition(String doclet) {
-		super(doclet, null);
+	public OJBCollectionDefinition(String doclet, String sourceCode, Path sourceFilePath) {
+		super(doclet, sourceCode, sourceFilePath, null);
 	}
 
 	@Override
@@ -28,12 +32,38 @@ public class OJBCollectionDefinition extends BaseDefinition {
 
 		Pattern pattern = Pattern.compile("element-class-ref\\s*=\\s*\"(.+?)\"");
 		Matcher matcher = pattern.matcher(doclet);
+		String joinColumnName = null;
 		
 		if (matcher.find()) {
-			values.add(String.format("targetEntity = %s.class", matcher.group(1)));
+			
+			String classRef = matcher.group(1);
+			String classRefName = classRef.replaceAll("(?<!.).+\\.", "");
+			
+			try {
+				Path targetClassPath = Paths.get(this.getSourceFilePath().getParent().toString(), classRefName + ".java");
+				String targetClassContent = new String(Files.readAllBytes(targetClassPath));
+				String foreignkey = this.extractFirstGroup("foreignkey\\s*=\\s*\"(\\w+)\"", doclet);
+				String fkDoclet = OJB2JPA.findDoclet(foreignkey, targetClassContent);
+				joinColumnName = this.extractFirstGroup("column\\s*=\\s*\"(\\w+)\"", fkDoclet);
+				if (joinColumnName.isEmpty()) {
+					
+					logger.error("Oh no, where's the join column name for this collection?");
+					logger.error("Check which field is pointing to the collection at Entity " + classRef);
+				}
+				else {
+					values.add(String.format("targetEntity = %s.class", classRef));
+				}
+				
+			} catch (IOException e) {
+				logger.error("Unable to read " + classRefName + " class.", e);
+			}
+				
 		}
 		
-		if (isAutoRetrieve()) {
+		if (isProxy()) {
+			values.add("fetch = FetchType.LAZY");
+		}
+		else if (isAutoRetrieve() && !isProxy()) {
 			values.add("fetch = FetchType.EAGER");
 		}
 		else if (values.size() > 0) {
@@ -57,12 +87,14 @@ public class OJBCollectionDefinition extends BaseDefinition {
 		
 		if (!values.isEmpty()) {
 			
-			String jpaAnnotation = String.format("@OneToMany(%s)", String.join(", ", values));
-			
+			String one2many = String.format("@OneToMany(%s)", String.join(", ", values));
+			jpaAnnotations.add(one2many);
 			jpaImports.add("import javax.persistence.OneToMany;");
 			jpaImports.add("import javax.persistence.FetchType;");
 			
-			jpaAnnotations.add(jpaAnnotation);
+			String joinColumn = String.format("@JoinColumn(name = \"%s\")", joinColumnName);
+			jpaAnnotations.add(joinColumn);
+			jpaImports.add("import javax.persistence.JoinColumn;");
 			
 			if (hasOrderBy()) {
 				jpaImports.add("import javax.persistence.OrderBy;");

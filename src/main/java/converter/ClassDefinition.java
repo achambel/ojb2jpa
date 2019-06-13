@@ -17,7 +17,7 @@ public class ClassDefinition extends BaseDefinition {
 	private String entityName;
 
 	public ClassDefinition(String docletForEntity) {
-		super(docletForEntity, null);
+		super(docletForEntity, null, null, null);
 	}
 	
 	

@@ -43,7 +43,7 @@ public class OJBReferenceDefinitionTest {
 				"     *                      auto-retrieve=\"true\" proxy=\"true\"\n" + 
 				"     */";
 		
-		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode);
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode, null);
 		
 		assertEquals(doclet, reference.getDoclet());
 		
@@ -53,7 +53,7 @@ public class OJBReferenceDefinitionTest {
 		assertTrue(reference.getJPAImports().contains("import javax.persistence.JoinColumn;"));
 		assertTrue(reference.getJPAImports().contains("import javax.persistence.FetchType;"));
 		
-		String one2oneAnnotation = "@OneToOne(targetEntity = com.aliquantum.objects.User.class, fetch = FetchType.EAGER)";
+		String one2oneAnnotation = "@OneToOne(targetEntity = com.aliquantum.objects.User.class, fetch = FetchType.LAZY)";
 		assertTrue(reference.getJPAAnnotations().contains(one2oneAnnotation));
 		
 		String joinColumnAnnotation = "@JoinColumn(name = \"user_id\")";
@@ -72,7 +72,7 @@ public class OJBReferenceDefinitionTest {
 				"     *                    auto-update=\"false\"\n" +  
 				"     */";
 		
-		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode);
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode, null);
 		
 		assertEquals(doclet, reference.getDoclet());
 		
@@ -92,7 +92,7 @@ public class OJBReferenceDefinitionTest {
 				"     *                    auto-retrieve=\"true\"\n" +
 				"     */";
 		
-		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode);
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, sourceCode, null);
 		
 		assertEquals(doclet, reference.getDoclet());
 		
@@ -108,7 +108,7 @@ public class OJBReferenceDefinitionTest {
 		
 		String doclet = "// just a single line comment";
 		
-		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, "");
+		OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, "", null);
 		
 		assertTrue(reference.getJPAImports().isEmpty());
 		assertTrue(reference.getJPAAnnotations().isEmpty());

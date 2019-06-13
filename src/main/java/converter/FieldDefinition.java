@@ -1,5 +1,6 @@
 package converter;
 
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,8 +16,8 @@ public class FieldDefinition extends BaseDefinition {
 
 	static final Logger logger = LoggerFactory.getLogger(FieldDefinition.class);
 	
-	public FieldDefinition(String docletForField, String sourceCode) {
-		super(docletForField, sourceCode);
+	public FieldDefinition(String docletForField, String sourceCode, Path sourceFilePath, String fieldName) {
+		super(docletForField, sourceCode, sourceFilePath, fieldName);
 	}
 
 	@Override
@@ -33,17 +34,17 @@ public class FieldDefinition extends BaseDefinition {
 			
 			String type = matcher.group(1);
 			if (type.equals("field")) {
-				OJBFieldDefinition field = new OJBFieldDefinition(doclet);
+				OJBFieldDefinition field = new OJBFieldDefinition(doclet, getSourceCode(), getSourceFilePath(), getFieldName());
 				jpaAnnotations.addAll(field.getJPAAnnotations());
 				jpaImports.addAll(field.getJPAImports());
 			} 
 			else if (type.equals("collection")) {
-				OJBCollectionDefinition collection = new OJBCollectionDefinition(doclet);
+				OJBCollectionDefinition collection = new OJBCollectionDefinition(doclet, getSourceCode(), getSourceFilePath());
 				jpaAnnotations.addAll(collection.getJPAAnnotations());
 				jpaImports.addAll(collection.getJPAImports());
 			}
 			else if (type.equals("reference")) {
-				OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, getSourceCode());
+				OJBReferenceDefinition reference = new OJBReferenceDefinition(doclet, getSourceCode(), getSourceFilePath());
 				jpaAnnotations.addAll(reference.getJPAAnnotations());
 				jpaImports.addAll(reference.getJPAImports());
 			}

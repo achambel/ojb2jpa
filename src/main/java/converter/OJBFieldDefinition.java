@@ -1,5 +1,6 @@
 package converter;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -17,8 +18,8 @@ public class OJBFieldDefinition extends BaseDefinition {
 
 	static final Logger logger = LoggerFactory.getLogger(OJBFieldDefinition.class);
 	
-	public OJBFieldDefinition(String doclet) {
-		super(doclet, null);
+	public OJBFieldDefinition(String doclet, String sourceCode, Path sourceFilePath, String fieldName) {
+		super(doclet, sourceCode, sourceFilePath, fieldName);
 	}
 
 	@Override
@@ -31,6 +32,11 @@ public class OJBFieldDefinition extends BaseDefinition {
 		
 		if (matcher.find()) {
 			values.add(String.format("name = \"%s\"", matcher.group(1)));
+		}
+		
+		if (isForeignkey(fieldName)) {
+			// Entity has already a column with the same name annotated
+			values.add("insertable = false, updatable = false");
 		}
 		
 		pattern = Pattern.compile("length=\"(\\d+)\"");
@@ -51,6 +57,17 @@ public class OJBFieldDefinition extends BaseDefinition {
 			
 		}
 		
+	}
+
+	private boolean isForeignkey(String fieldName) {
+
+		final String regex = String.format("foreignkey\\s*=\\s*\"%s\"", fieldName);
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(sourceCode);
+		
+		boolean result = matcher.find();
+		
+		return result;
 	}
 
 	@Override

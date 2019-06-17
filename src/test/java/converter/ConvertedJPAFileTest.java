@@ -1,11 +1,14 @@
 package converter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Test;
 
@@ -25,12 +28,25 @@ public class ConvertedJPAFileTest {
 
 		ConvertedJPAFile jpaFile = new ConvertedJPAFile(Paths.get(sourceFilePath), pathToSave);
 
-		assertEquals(9, jpaFile.getImports().size());
+		assertEquals(10, jpaFile.getImports().size());
 
 		assertEquals("package converter.resources.classes;", jpaFile.getPackageName());
 
 		assertEquals("HelloWorld", jpaFile.getClassName());
-
+		
+		assertTrue(jpaFile.getImports().contains("import javax.persistence.Transient;"));
+		
+		String regex = "@Transient";
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(jpaFile.printConvertedClass());
+		
+		int count = 0;
+		while(matcher.find()) {
+			count++;
+		}
+		
+		assertEquals(4, count);
+		
 	}
 
 	@Test

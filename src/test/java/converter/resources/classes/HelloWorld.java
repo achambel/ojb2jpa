@@ -32,6 +32,8 @@ public class HelloWorld {
 	public static final String STATUS_BLOCKED = "B";
 	private static final String STATUS_UNASSIGNED = "U";
 	
+	private String worldName;
+	
 	@Resource(name = "foo", description = "bar")
 	public static final String DEFAULT_STATUS = STATUS_UNASSIGNED;
 		
@@ -46,9 +48,9 @@ public class HelloWorld {
 	}};
 	
 	/**
-     * @ojb.collection element-class-ref="com.aliquantum.objects.UserDocumentUser"
+     * @ojb.collection element-class-ref="com.aliquantum.objects.User"
      *                 collection-class="org.apache.ojb.broker.util.collections.RemovalAwareCollection"
-     *            	   foreignkey="userDocumentIdentity"
+     *            	   foreignkey="userIdentity"
      *            	   orderby="userIdentity=DESC"
      *   		  	   auto-delete="true"
      *   		  	   auto-insert="true"
@@ -107,6 +109,14 @@ public class HelloWorld {
 
 	public void setUsers(List<String> users) {
 		this.users = users;
+	}
+
+	public String getWorldName() {
+		return worldName;
+	}
+
+	public void setWorldName(String worldName) {
+		this.worldName = worldName;
 	}
 	
 	

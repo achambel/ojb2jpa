@@ -2,6 +2,7 @@ package converter;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -133,6 +134,19 @@ public class ConvertedJPAFile {
 
 			if (docletForField.isEmpty()) {
 				logger.warn("No doclet has been found for the field " + field.getName());
+				
+				String modifier = Modifier.toString(field.getModifiers());
+				
+				if (modifier.contains("static")) {
+					logger.warn("Static field found. JPA will not use this as a persistent field. Don't need to annotate it.");
+				}
+				else {
+					logger.warn("So generating @Transient annotation. This field will not be persisted.");
+					String fieldStr =  modifier + " " + field.getType().getSimpleName();
+					final String regex = String.format(".%s.+\\b%s\\b.*", Pattern.quote(fieldStr.trim()), field.getName());
+					target = target.replaceAll(regex, "\t@Transient\n$0");
+					imports.add("import javax.persistence.Transient;");
+				}
 			} else {
 				FieldDefinition fieldDefinition = new FieldDefinition(docletForField, OJBFileContent, this.sourceFilePath, field.getName());
 				if (fieldDefinition.isCandidateForConvertion()) {

@@ -24,6 +24,7 @@ public abstract class BaseDefinition implements IDefinition {
 	protected String sourceCode;
 	protected Path sourceFilePath;
 	protected String fieldName;
+	protected boolean primitiveToWrapper;
 	
 	public BaseDefinition(String doclet, String sourceCode, Path sourceFilePath, String fieldName) {
 		
@@ -33,6 +34,14 @@ public abstract class BaseDefinition implements IDefinition {
 		this.fieldName = fieldName;
 		
 		findDefinition();
+	}
+	
+	public boolean isPrimitiveToWrapper() {
+		return primitiveToWrapper;
+	}
+	
+	public void setPrimitiveToWrapper(boolean primitive) {
+		this.primitiveToWrapper = primitive;
 	}
 	
 	public String getFieldName() {

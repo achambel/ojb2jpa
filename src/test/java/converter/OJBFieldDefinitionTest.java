@@ -87,6 +87,8 @@ public class OJBFieldDefinitionTest {
 		
 		String columnAnnotation = "@Column(name = \"ACCOUNT_ID\", insertable = false, updatable = false)";
 		assertTrue(field.jpaAnnotations.contains(columnAnnotation));
+		
+		assertTrue(field.isPrimitiveToWrapper());
 	}
 	
 	@Test

@@ -35,6 +35,7 @@ public class FieldDefinition extends BaseDefinition {
 			String type = matcher.group(1);
 			if (type.equals("field")) {
 				OJBFieldDefinition field = new OJBFieldDefinition(doclet, getSourceCode(), getSourceFilePath(), getFieldName());
+				this.setPrimitiveToWrapper(field.isPrimitiveToWrapper());
 				jpaAnnotations.addAll(field.getJPAAnnotations());
 				jpaImports.addAll(field.getJPAImports());
 			} 

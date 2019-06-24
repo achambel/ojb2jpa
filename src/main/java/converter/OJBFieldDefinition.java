@@ -37,6 +37,11 @@ public class OJBFieldDefinition extends BaseDefinition {
 		if (isForeignkey(fieldName)) {
 			// Entity has already a column with the same name annotated
 			values.add("insertable = false, updatable = false");
+			
+			// May foreign key is null and JPA will try assign null to primitive field.
+			// So we need to replace primitive fields by Wrapper classes.
+			// Example: "private long accountIdentity;" will become "private Long accountIdentity;"
+			this.setPrimitiveToWrapper(true);
 		}
 		
 		pattern = Pattern.compile("length=\"(\\d+)\"");

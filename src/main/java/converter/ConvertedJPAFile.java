@@ -154,6 +154,15 @@ public class ConvertedJPAFile {
 					target = target.replace(docletForField, String.join("\n\t", fieldDefinition.getJPAAnnotations()));
 					imports.addAll(fieldDefinition.getJPAImports());
 				}
+				if (fieldDefinition.isPrimitiveToWrapper()) {
+					
+					logger.info("Replacing long primitive type by Long wrapper class...");
+					
+					final String regex = String.format("long\\s+%s\\s*;", field.getName());
+					final String replacement = String.format("Long %s;", field.getName());
+					
+					target = target.replaceFirst(regex, replacement);
+				}
 			}
 
 		}

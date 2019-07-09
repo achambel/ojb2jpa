@@ -23,6 +23,20 @@ public class AccountNote {
     private long accountIdentity;
     
     /**
+     * @ojb.reference     class-ref="com.aliquantum.objects.Game"
+     *                     foreignkey="gameIdentity"
+     *                      auto-update="false"
+     *                      auto-retrieve="true" proxy="true"
+     */
+    private Game game;
+
+    /**
+     * @ojb.field column="GAME_ID"
+     *            jdbc-type="INTEGER"
+     */
+    private long gameIdentity = 957;
+    
+    /**
      * @ojb.field column="activated"
      *            jdbc-type="INTEGER"
      */

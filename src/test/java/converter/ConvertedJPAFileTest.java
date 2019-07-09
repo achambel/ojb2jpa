@@ -88,5 +88,26 @@ public class ConvertedJPAFileTest {
 		assertEquals(1, count);
 		
 	}
+	
+	@Test
+	public void primitiveToWrapperWithDefaultValueTest() throws Exception {
+		
+		Path sourceFilePath = Paths.get(basePath, "/src/test/java/converter/resources/classes/AccountNote.java");
+		
+		ConvertedJPAFile jpaFile = new ConvertedJPAFile(sourceFilePath, pathToSave);
+		
+		System.out.println(jpaFile.printConvertedClass());
+		
+		Pattern pattern = Pattern.compile("private Long gameIdentity = 957l;");
+		Matcher matcher = pattern.matcher(jpaFile.printConvertedClass());
+		
+		int count = 0;
+		while(matcher.find()) {
+			count++;
+		}
+		
+		assertEquals(1, count);
+		
+	}
 
 }

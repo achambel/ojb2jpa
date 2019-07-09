@@ -158,10 +158,9 @@ public class ConvertedJPAFile {
 					
 					logger.info("Replacing long primitive type by Long wrapper class...");
 					
-					final String regex = String.format("long\\s+%s\\s*;", field.getName());
-					final String replacement = String.format("Long %s;", field.getName());
+					final String regex = String.format("(long)(\\s+%s\\s*.*;)", field.getName());
 					
-					target = target.replaceFirst(regex, replacement);
+					target = target.replaceAll(regex, "Long$2");
 				}
 			}
 

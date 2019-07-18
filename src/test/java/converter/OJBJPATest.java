@@ -43,7 +43,7 @@ public class OJBJPATest {
 		OJB2JPA converter = new OJB2JPA(sourceFolderPath);
 		
 		converter.convert(pathToSave);
-		assertEquals(4, converter.getJPAFiles().size());
+		assertEquals(7, converter.getJPAFiles().size());
 		
 		converter.write();
 		

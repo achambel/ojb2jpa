@@ -109,5 +109,26 @@ public class ConvertedJPAFileTest {
 		assertEquals(1, count);
 		
 	}
+	
+	@Test
+	public void fixNameTest() throws Exception {
+		
+		Path sourceFilePath = Paths.get(basePath, "/src/test/java/converter/resources/classes/Person.java");
+		
+		ConvertedJPAFile jpaFile = new ConvertedJPAFile(sourceFilePath, pathToSave);
+		
+		System.out.println(jpaFile.printConvertedClass());
+		
+		Pattern pattern = Pattern.compile("import com.aliquantum.jpa.mock.PersistenceBroker;");
+		Matcher matcher = pattern.matcher(jpaFile.printConvertedClass());
+		
+		assertTrue(matcher.find());
+		
+		pattern = Pattern.compile("extends BaseIdentifiableVO");
+		matcher = pattern.matcher(jpaFile.printConvertedClass());
+		
+		assertTrue(matcher.find());
+		
+	}
 
 }

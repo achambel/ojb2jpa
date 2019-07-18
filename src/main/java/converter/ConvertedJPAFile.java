@@ -33,7 +33,7 @@ public class ConvertedJPAFile {
 	private Path sourceFilePath;
 	private Class<?> clazz;
 
-	private List<String> skippedClasses = Arrays.asList("BaseIdentifieableVO", "BaseVO");
+	private List<String> skippedClasses = Arrays.asList("BaseIdentifieableVO", "BaseVO", "BaseIdentifiableVO");
 
 	private String target;
 
@@ -95,6 +95,13 @@ public class ConvertedJPAFile {
 		printableImports.add(0, getPackageName() + "\n");
 
 		target = target.replace(getPackageName(), String.join("\n", printableImports));
+		
+		String oldPkg = "import org.apache.ojb.broker.PersistenceBroker;";
+		String newPkg = "import com.aliquantum.jpa.mock.PersistenceBroker;";
+		target = target.replace(oldPkg, newPkg);
+		
+		String oldParent = "(extends)(\\s+)(BaseIdentifieableVO)";
+		target = target.replaceFirst(oldParent, "$1$2BaseIdentifiableVO");
 
 		logger.info("Parser finished for file " + sourceFilePath);
 

@@ -51,6 +51,13 @@ public class OJBFieldDefinition extends BaseDefinition {
 			values.add(String.format("length = %s", matcher.group(1)));
 		}
 		
+		pattern = Pattern.compile("jdbc-type=\"LONGVARCHAR\"");
+		matcher = pattern.matcher(doclet);
+		
+		if (matcher.find()) {
+			values.add("columnDefinition = \"TEXT\"");
+		}
+		
 		if (!values.isEmpty()) {
 			
 			String jpaAnnotation = String.format("@Column(%s)", String.join(", ", values));

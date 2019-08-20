@@ -40,8 +40,12 @@ public class ClassDefinition extends BaseDefinition {
 			jpaAnnotations.add("@Entity");
 			jpaAnnotations.add(table);
 			
+			String sequence = String.format("@SequenceGenerator(name = \"SEQ_STORE\", sequenceName = \"seq_%s\", allocationSize = 20)", entityName);
+			jpaAnnotations.add(sequence);
+			
 			jpaImports.add("import javax.persistence.Entity;");
 			jpaImports.add("import javax.persistence.Table;");
+			jpaImports.add("import javax.persistence.SequenceGenerator;");
 			
 			logger.info("Annotations mapped...\n" + String.join("\n", jpaAnnotations));
 		}
